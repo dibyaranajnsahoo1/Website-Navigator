@@ -1,7 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+const api = axios.create({
+  baseURL: `${import.meta.env.VITE_API_BASE_URL}/api`,
+  withCredentials: true,
+});
 
 const initialState = {
   urls: [],
@@ -186,7 +189,12 @@ export function AppProvider({ children }) {
       dispatch({ type: 'SET_URLS', payload: data.urls });
       toast(`✓ Loaded ${data.count} URLs`, 'success');
     } catch (err) {
-      toast(err.response?.data?.error || 'Upload failed', 'error');
+      toast(
+      typeof err.response?.data?.error === 'string'
+        ? err.response.data.error
+        : 'Upload failed',
+      'error'
+    );
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
