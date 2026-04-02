@@ -1,6 +1,6 @@
 # 🌐 Website Navigator
 
-A production-ready full-stack web application for bulk URL navigation. Upload Excel, CSV, or Google Sheets — then browse through websites one by one with keyboard support, bookmarks, history, auto-slideshow, and multi-tab mode.
+A full-stack web application for bulk URL navigation. Upload Excel, CSV, or Google Sheets then browse through websites one by one with keyboard support, bookmarks, history, auto-slideshow, and multi-tab mode.
 
 ---
 
@@ -37,7 +37,7 @@ A production-ready full-stack web application for bulk URL navigation. Upload Ex
 
 | Layer       | Technology                          |
 |-------------|-------------------------------------|
-| Frontend    | React 18 + Vite                     |
+| Frontend    | React + Vite                     |
 | Styling     | Pure CSS with CSS Variables          |
 | State       | Context API + useReducer            |
 | Backend     | Node.js + Express.js                |
@@ -51,14 +51,14 @@ A production-ready full-stack web application for bulk URL navigation. Upload Ex
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
+- Node.js 
 - MongoDB running locally (or a MongoDB Atlas URI)
 
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/yourname/website-navigator-pro.git
-cd website-navigator-pro
+git clone https://github.com/dibyaranajnsahoo1/Website-Navigator
+cd website-navigator
 npm run install:all
 ```
 
@@ -84,43 +84,43 @@ npm run dev
 
 ```
 website-navigator-pro/
-├── client/                     # React frontend
+├── client/                    
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── TopBar.jsx      # Search, theme toggle, export
-│   │   │   ├── Sidebar.jsx     # Panel switcher
-│   │   │   ├── UploadPanel.jsx # Drag & drop + Google Sheets
-│   │   │   ├── UrlList.jsx     # Loaded URL list
+│   │   │   ├── TopBar.jsx      
+│   │   │   ├── Sidebar.jsx     
+│   │   │   ├── UploadPanel.jsx 
+│   │   │   ├── UrlList.jsx     
 │   │   │   ├── HistoryPanel.jsx
 │   │   │   ├── BookmarksPanel.jsx
-│   │   │   ├── MainPanel.jsx   # Tab bar + iframe viewer + nav
+│   │   │   ├── MainPanel.jsx   
 │   │   │   └── ToastContainer.jsx
 │   │   ├── context/
-│   │   │   └── AppContext.jsx  # Global state (Context API)
+│   │   │   └── AppContext.jsx  
 │   │   ├── App.jsx
 │   │   ├── App.css
-│   │   ├── index.css           # Global styles + CSS variables
+│   │   ├── index.css          
 │   │   └── main.jsx
 │   ├── index.html
 │   ├── vite.config.js
 │   └── package.json
 │
-├── server/                     # Express backend
+├── server/                     
 │   ├── models/
 │   │   ├── History.js
 │   │   └── Bookmark.js
 │   ├── routes/
-│   │   ├── upload.js           # POST /upload/file, POST /upload/sheets
-│   │   ├── history.js          # GET/POST/DELETE /history
-│   │   └── bookmarks.js        # GET/POST/DELETE /bookmarks
+│   │   ├── upload.js          
+│   │   ├── history.js          
+│   │   └── bookmarks.js        
 │   ├── middleware/
 │   │   └── rateLimiter.js
 │   ├── utils/
-│   │   └── urlValidator.js     # Validate, sanitise, deduplicate
+│   │   └── urlValidator.js     
 │   ├── app.js
 │   └── package.json
 │
-├── package.json                # Root scripts (concurrently)
+├── package.json                
 ├── .env.example
 ├── .gitignore
 └── README.md
@@ -177,8 +177,8 @@ website-navigator-pro/
 ```env
 PORT=5000
 NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/website-navigator
-CLIENT_URL=http://localhost:5173
+MONGODB_URI=
+CLIENT_URL=
 ```
 
 ---
@@ -193,10 +193,11 @@ npm run build
 npm start
 ```
 
-For production, serve the `client/dist` folder via nginx or a CDN, and point the API to your production MongoDB Atlas URI.
+
 
 ---
 
 ## 📄 License
 
-MIT © 2024 Website Navigator Pro
+MIT © 2026 Website Navigator Pro
+DIBYA RANJAN SAHOO
