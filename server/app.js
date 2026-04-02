@@ -48,8 +48,8 @@ app.use((err, req, res, next) => {
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => {
-    console.log('✅ MongoDB connected');
-    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+    console.log(' MongoDB connected');
+    app.listen(PORT, () => console.log(` Server running on port ${PORT}`));
   })
   .catch((err) => {
     console.error('❌ MongoDB connection failed:', err.message);

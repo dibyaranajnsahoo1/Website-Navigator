@@ -196,7 +196,7 @@ function NavControls() {
   );
 }
 
-/* ── URL Address Bar ───────────────────────────────────── */
+
 function UrlBar({ urlObj }) {
   if (!urlObj) return null;
   return (
@@ -219,14 +219,14 @@ function UrlBar({ urlObj }) {
   );
 }
 
-/* ── Welcome Screen ────────────────────────────────────── */
+
 function WelcomeScreen() {
   // const { dispatch } = useApp();
   const { dispatch, fileInputRef } = useApp();
   return (
     <div className="welcome-screen">
       <div className="welcome-logo">🌐</div>
-      <h2>Website Navigator Pro</h2>
+      <h2>Website Navigator</h2>
       <p>
         Upload an Excel, CSV file, or paste a Google Sheets link to load your URL list.
         Then browse through them with keyboard arrows or the navigation controls.
@@ -237,7 +237,6 @@ function WelcomeScreen() {
         onClick={() => {
   dispatch({ type: 'SET_SIDEBAR_PANEL', payload: 'upload' });
 
-  // 🔥 open file picker
   setTimeout(() => {
     fileInputRef.current?.click();
   }, 100);
@@ -264,13 +263,12 @@ function WelcomeScreen() {
   );
 }
 
-/* ── Main Panel ────────────────────────────────────────── */
+
 export default function MainPanel() {
   const { state } = useApp();
   const { filteredUrls, currentIndex, tabs, activeTabId } = state;
   const currentUrl = filteredUrls[currentIndex] || null;
 
-  // Determine what to show in viewer
   const activeTab = tabs.find((t) => t.id === activeTabId);
   const displayUrl = activeTab ? activeTab.urlObj : currentUrl;
 
