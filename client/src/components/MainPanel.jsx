@@ -268,7 +268,7 @@ function WelcomeScreen() {
         {[
           ['← →', 'Navigate'],
           ['Space', 'Play/Pause'],
-          ['Ctrl+B', 'Bookmark'],
+
         ].map(([key, label]) => (
           <div key={key} style={{ textAlign: 'center' }}>
             <div style={{ background: 'var(--bg-overlay)', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontFamily: 'monospace', marginBottom: 4, fontSize: 11, color: 'var(--text-secondary)' }}>{key}</div>
