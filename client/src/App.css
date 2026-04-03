@@ -339,6 +339,22 @@
 
 .upload-panel { padding: 16px; }
 
+.upload-panel-header {
+  margin-bottom: 14px;
+}
+
+.upload-panel-header h3 {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+
+.upload-panel-header p {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
 .upload-zone {
   border: 2px dashed var(--border);
   border-radius: var(--radius-lg);
@@ -368,6 +384,11 @@
 }
 .upload-zone input[type='file'] { display: none; }
 
+.upload-browse-btn {
+  margin-top: 12px;
+  pointer-events: none;
+}
+
 .divider {
   display: flex;
   align-items: center;
@@ -386,7 +407,18 @@
   background: var(--border);
 }
 
-.sheets-input-wrap { display: flex; flex-direction: column; gap: 8px; }
+.sheets-input-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.upload-section-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
 
 .url-list { padding: 8px; }
 .url-list-header {

@@ -1,12 +1,10 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 
 export default function UploadPanel() {
-  const { uploadFile, uploadGoogleSheet, state } = useApp();
+  const { uploadFile, uploadGoogleSheet, state, fileInputRef } = useApp();
   const [dragOver, setDragOver] = useState(false);
   const [sheetsUrl, setSheetsUrl] = useState('');
-  // const fileRef = useRef();
-  const { fileInputRef } = useApp();
 
   const handleFile = (file) => {
     if (!file) return;
@@ -21,32 +19,36 @@ export default function UploadPanel() {
   const handleDrop = (e) => {
     e.preventDefault();
     setDragOver(false);
-    const file = e.dataTransfer.files[0];
-    handleFile(file);
+    handleFile(e.dataTransfer.files[0]);
   };
 
   const handleSheets = (e) => {
     e.preventDefault();
-    if (sheetsUrl.trim()) {
-      uploadGoogleSheet(sheetsUrl.trim());
-      setSheetsUrl('');
-    }
+    if (!sheetsUrl.trim()) return;
+    uploadGoogleSheet(sheetsUrl.trim());
+    setSheetsUrl('');
   };
 
   return (
     <div className="upload-panel">
+      <div className="upload-panel-header">
+        <h3>Import URLs</h3>
+        <p>Upload a spreadsheet or paste a Google Sheets link. Valid URLs are detected automatically.</p>
+      </div>
+
       <div
         className={`upload-zone ${dragOver ? 'drag-over' : ''}`}
         onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
         onDragLeave={() => setDragOver(false)}
         onDrop={handleDrop}
-        // onClick={() => fileRef.current.click()}
-        onClick={() => fileInputRef.current.click()}
+        onClick={() => fileInputRef.current?.click()}
       >
         <div className="upload-zone-icon">📂</div>
-        <h4>Drop file here</h4>
-        <p>.xlsx, .xls, .csv supported</p>
-        <p style={{ marginTop: 6, fontSize: 11, color: 'var(--accent)' }}>Click to browse</p>
+        <h4>Drop a spreadsheet here</h4>
+        <p>Supports `.xlsx`, `.xls`, and `.csv`</p>
+        <button type="button" className="btn btn-primary upload-browse-btn" tabIndex={-1}>
+          Choose file
+        </button>
         <input
   ref={fileInputRef}
           type="file"
@@ -61,10 +63,9 @@ export default function UploadPanel() {
         </div>
       )}
 
-      <div className="divider">or</div>
 
       <div className="sheets-input-wrap">
-        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)' }}>
+        <label className="upload-section-label">
           🔗 Google Sheets Link
         </label>
         <input
@@ -89,8 +90,7 @@ export default function UploadPanel() {
 
       <div style={{ marginTop: 14, fontSize: 11, color: 'var(--text-muted)', lineHeight: 1.6 }}>
         <strong style={{ display: 'block', marginBottom: 4, color: 'var(--text-secondary)' }}>Tips:</strong>
-        URLs can be in any column we'll find them automatically.<br />
-        Invalid URLs and duplicates are removed.<br />
+        URLs can be in any column and duplicates are removed.<br />
         Use <strong>← →</strong> keyboard arrows to navigate.
       </div>
     </div>

@@ -2,12 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext.jsx';
 
 function TabBar() {
-  const { state, dispatch } = useApp();
-  const { tabs, activeTabId, filteredUrls, currentIndex } = state;
+  const { state, dispatch, activeTab } = useApp();
+  const { tabs, activeTabId, filteredUrls } = state;
+  const currentIndex = activeTab?.index ?? state.currentIndex;
   const currentUrl = filteredUrls[currentIndex] || null;
 
   const addTab = () => {
-    if (currentUrl) dispatch({ type: 'ADD_TAB', payload: currentUrl });
+    if (!filteredUrls.length) return;
+    const openIndexes = new Set(tabs.map((tab) => tab.index));
+    const nextIndex =
+      filteredUrls.findIndex((_, index) => index > currentIndex && !openIndexes.has(index));
+    const fallbackIndex = filteredUrls.findIndex((_, index) => !openIndexes.has(index));
+    const targetIndex = nextIndex !== -1
+      ? nextIndex
+      : fallbackIndex !== -1
+        ? fallbackIndex
+        : currentIndex;
+
+    dispatch({ type: 'ADD_TAB', payload: targetIndex });
   };
 
   if (tabs.length === 0 && !currentUrl) return null;
@@ -21,11 +33,11 @@ function TabBar() {
           onClick={() => dispatch({ type: 'SET_ACTIVE_TAB', payload: tab.id })}
         >
           <img
-            src={tab.urlObj.favicon || `https://www.google.com/s2/favicons?domain=${tab.urlObj.domain}&sz=32`}
+            src={currentUrlForTab(tab, filteredUrls)?.favicon || `https://www.google.com/s2/favicons?domain=${currentUrlForTab(tab, filteredUrls)?.domain}&sz=32`}
             alt="" onError={(e) => { e.target.style.display = 'none'; }}
           />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
-            {tab.urlObj.domain || tab.urlObj.url}
+            {currentUrlForTab(tab, filteredUrls)?.domain || currentUrlForTab(tab, filteredUrls)?.url || 'New tab'}
           </span>
           <span
             className="tab-close"
@@ -38,6 +50,10 @@ function TabBar() {
       )}
     </div>
   );
+}
+
+function currentUrlForTab(tab, filteredUrls) {
+  return filteredUrls[tab.index] || null;
 }
 
 function IframeViewer({ urlObj }) {
@@ -116,8 +132,9 @@ function IframeViewer({ urlObj }) {
 }
 
 function NavControls() {
-  const { state, dispatch, goNext, goPrev, addBookmark, toast } = useApp();
-  const { filteredUrls, currentIndex, slideshowActive, slideshowInterval } = state;
+  const { state, dispatch, goNext, goPrev, addBookmark, toast, activeTab } = useApp();
+  const { filteredUrls, slideshowActive, slideshowInterval } = state;
+  const currentIndex = activeTab?.index ?? state.currentIndex;
   const current = filteredUrls[currentIndex];
 
   const progress = filteredUrls.length > 1
@@ -134,7 +151,7 @@ function NavControls() {
 
   return (
     <div className="nav-controls">
-      <button className="btn btn-ghost" onClick={goPrev} disabled={currentIndex === 0} style={{ padding: '6px 12px' }}>
+      <button className="btn btn-ghost" onClick={goPrev} disabled={currentIndex === 0} style={{ padding: '6px 12px', opacity: currentIndex === 0 ? 0.5 : 1,cursor: currentIndex === 0 ? "not-allowed" : "pointer"}}>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
         Prev
       </button>
@@ -147,7 +164,7 @@ function NavControls() {
 
       <span className="nav-counter">{currentIndex + 1} / {filteredUrls.length}</span>
 
-      <button className="btn btn-ghost" onClick={goNext} disabled={currentIndex === filteredUrls.length - 1} style={{ padding: '6px 12px' }}>
+      <button className="btn btn-ghost" onClick={goNext} disabled={currentIndex === filteredUrls.length - 1}  style={{ padding: '6px 12px', opacity: currentIndex === filteredUrls.length - 1 ? 0.5 : 1,cursor: currentIndex === filteredUrls.length - 1 ? "not-allowed" : "pointer"}}>
         Next
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
       </button>
@@ -265,12 +282,10 @@ function WelcomeScreen() {
 
 
 export default function MainPanel() {
-  const { state } = useApp();
-  const { filteredUrls, currentIndex, tabs, activeTabId } = state;
-  const currentUrl = filteredUrls[currentIndex] || null;
-
-  const activeTab = tabs.find((t) => t.id === activeTabId);
-  const displayUrl = activeTab ? activeTab.urlObj : currentUrl;
+  const { state, activeTab } = useApp();
+  const { filteredUrls } = state;
+  const currentIndex = activeTab?.index ?? state.currentIndex;
+  const displayUrl = filteredUrls[currentIndex] || null;
 
   return (
     <main className="main-panel">

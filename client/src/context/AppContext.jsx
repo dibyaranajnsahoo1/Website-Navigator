@@ -37,25 +37,66 @@ const initialState = {
   toasts: [],
 };
 
+function clampIndex(index, length) {
+  if (length <= 0) return 0;
+  return Math.max(0, Math.min(index, length - 1));
+}
+
+function createTab(index = 0) {
+  return { id: crypto.randomUUID(), index };
+}
+
+function getActiveTab(state) {
+  return state.tabs.find((tab) => tab.id === state.activeTabId) || null;
+}
+
 function reducer(state, action) {
   switch (action.type) {
     case 'SET_URLS': {
       const urls = action.payload;
+      const filteredUrls = filterUrls(urls, state.searchQuery);
+      const tabs = filteredUrls.length > 0 ? [createTab(0)] : [];
       return {
         ...state,
         urls,
-        filteredUrls: filterUrls(urls, state.searchQuery),
+        filteredUrls,
         currentIndex: 0,
-        tabs: urls.length > 0 ? [{ id: crypto.randomUUID(), urlObj: urls[0], active: true }] : [],
-        activeTabId: null,
+        tabs,
+        activeTabId: tabs[0]?.id || null,
       };
     }
     case 'SET_SEARCH': {
       const q = action.payload;
-      return { ...state, searchQuery: q, filteredUrls: filterUrls(state.urls, q), currentIndex: 0 };
+      const filteredUrls = filterUrls(state.urls, q);
+      const tabs = state.tabs.map((tab) => ({
+        ...tab,
+        index: clampIndex(tab.index, filteredUrls.length),
+      }));
+      const activeTab = tabs.find((tab) => tab.id === state.activeTabId) || tabs[0] || null;
+      return {
+        ...state,
+        searchQuery: q,
+        filteredUrls,
+        tabs,
+        activeTabId: activeTab?.id || null,
+        currentIndex: activeTab?.index || 0,
+      };
     }
-    case 'SET_INDEX':
-      return { ...state, currentIndex: Math.max(0, Math.min(action.payload, state.filteredUrls.length - 1)) };
+    case 'SET_INDEX': {
+      const index = clampIndex(action.payload, state.filteredUrls.length);
+      const activeTabId = state.activeTabId || state.tabs[0]?.id || null;
+      if (!activeTabId) {
+        return { ...state, currentIndex: index };
+      }
+      return {
+        ...state,
+        currentIndex: index,
+        activeTabId,
+        tabs: state.tabs.map((tab) => (
+          tab.id === activeTabId ? { ...tab, index } : tab
+        )),
+      };
+    }
     case 'SET_THEME': {
       document.documentElement.setAttribute('data-theme', action.payload);
       localStorage.setItem('wnp_theme', action.payload);
@@ -89,16 +130,29 @@ function reducer(state, action) {
       return { ...state, bookmarks: state.bookmarks.filter((b) => b._id !== action.payload) };
 
     case 'ADD_TAB': {
-      const tab = { id: crypto.randomUUID(), urlObj: action.payload, active: true };
-      return { ...state, tabs: [...state.tabs, tab], activeTabId: tab.id };
+      const tab = createTab(clampIndex(action.payload, state.filteredUrls.length));
+      return { ...state, tabs: [...state.tabs, tab], activeTabId: tab.id, currentIndex: tab.index };
     }
     case 'CLOSE_TAB': {
+      const closedTabIndex = state.tabs.findIndex((t) => t.id === action.payload);
       const tabs = state.tabs.filter((t) => t.id !== action.payload);
-      const activeTabId = tabs.length ? tabs[tabs.length - 1].id : null;
-      return { ...state, tabs, activeTabId };
+      const fallbackIndex = Math.max(0, Math.min(closedTabIndex, tabs.length - 1));
+      const nextActiveTab =
+        state.activeTabId === action.payload
+          ? tabs[fallbackIndex] || null
+          : tabs.find((tab) => tab.id === state.activeTabId) || tabs[fallbackIndex] || null;
+      return {
+        ...state,
+        tabs,
+        activeTabId: nextActiveTab?.id || null,
+        currentIndex: nextActiveTab?.index || 0,
+      };
     }
-    case 'SET_ACTIVE_TAB':
-      return { ...state, activeTabId: action.payload };
+    case 'SET_ACTIVE_TAB': {
+      const activeTab = state.tabs.find((tab) => tab.id === action.payload);
+      if (!activeTab) return state;
+      return { ...state, activeTabId: action.payload, currentIndex: activeTab.index };
+    }
     
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, action.payload] };
@@ -139,7 +193,10 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!state.slideshowActive || state.filteredUrls.length <= 1) return;
     const timer = setInterval(() => {
-      dispatch({ type: 'SET_INDEX', payload: (state.currentIndex + 1) % state.filteredUrls.length });
+      const nextIndex = state.currentIndex + 1;
+      if (nextIndex < state.filteredUrls.length) {
+        dispatch({ type: 'SET_INDEX', payload: nextIndex });
+      }
     }, state.slideshowInterval * 1000);
     return () => clearInterval(timer);
   }, [state.slideshowActive, state.slideshowInterval, state.currentIndex, state.filteredUrls.length]);
@@ -169,11 +226,13 @@ export function AppProvider({ children }) {
   }, []);
 
   const goNext = useCallback(() => {
-    dispatch({ type: 'SET_INDEX', payload: (state.currentIndex + 1) % Math.max(state.filteredUrls.length, 1) });
+    if (state.currentIndex >= state.filteredUrls.length - 1) return;
+    dispatch({ type: 'SET_INDEX', payload: state.currentIndex + 1 });
   }, [state.currentIndex, state.filteredUrls.length]);
 
   const goPrev = useCallback(() => {
-    dispatch({ type: 'SET_INDEX', payload: (state.currentIndex - 1 + state.filteredUrls.length) % Math.max(state.filteredUrls.length, 1) });
+    if (state.currentIndex <= 0) return;
+    dispatch({ type: 'SET_INDEX', payload: state.currentIndex - 1 });
   }, [state.currentIndex, state.filteredUrls.length]);
 
   const goToIndex = useCallback((i) => {
@@ -295,8 +354,9 @@ export function AppProvider({ children }) {
     addBookmark,
     removeBookmark,
     exportUrls,
-    currentUrl: state.filteredUrls[state.currentIndex] || null,
-     fileInputRef,
+    currentUrl: state.filteredUrls[getActiveTab(state)?.index ?? state.currentIndex] || null,
+    activeTab: getActiveTab(state),
+    fileInputRef,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
